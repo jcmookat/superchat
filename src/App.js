@@ -1,25 +1,40 @@
-import logo from './logo.svg';
-import './App.css';
+import { useMemo } from 'react'
+import '@fontsource/roboto'
+import './App.css'
+import useMediaQuery from '@mui/material/useMediaQuery'
+import { createTheme, ThemeProvider } from '@mui/material/styles'
+import CssBaseline from '@mui/material/CssBaseline'
+
+import { db, auth } from './firebase.config'
+
+import { useAuthState } from 'react-firebase-hooks/auth'
+import { useCollectionData } from 'react-firebase-hooks/firestore'
+
+import SignIn from './components/SignIn'
+import Chatroom from './components/ChatRoom'
+import SignOut from './components/SignOut'
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+	const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
+	const theme = useMemo(
+		() =>
+			createTheme({
+				palette: {
+					mode: prefersDarkMode ? 'dark' : 'light',
+				},
+			}),
+		[prefersDarkMode],
+	)
+	const [user] = useAuthState(auth)
+	return (
+		<ThemeProvider theme={theme}>
+			<CssBaseline />
+			<div className='App'>
+				<header>{user && <SignOut />}</header>
+				<section>{user ? <Chatroom /> : <SignIn />}</section>
+			</div>
+		</ThemeProvider>
+	)
 }
 
-export default App;
+export default App
